@@ -4,7 +4,8 @@ header {
     align-items: center;      
     height: 100px;          
     background-color: #333;     
-    color: white;              
+    color: rgb(255, 0, 0);
+    font-size: 30px;      
 }
 
 
@@ -12,33 +13,63 @@ header {
     display: flex;             
     justify-content: center !important;    
     align-items: center !important;              
-    background-color: #f0f0f0;
+    background-color: #a58a8a;
     width: 400px;
     margin: auto;
     margin-top: 200px;
     height: 50px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    font-size: 25px;
+}
+#start:hover {
+    transform: scale(1.05);
+    color: rgb(214, 17, 17); 
+    text-shadow: 0 0 5px rgb(214, 17, 17) ,     
+    0 0 10px rgb(214, 17, 17) ,  
+    0 0 20px rgb(214, 17, 17);
 }
 
 #options {
     display: flex;             
     justify-content: center !important;    
     align-items: center !important;              
-    background-color: #f0f0f0;
+    background-color: #a58a8a;
     width: 400px;
     margin: auto;
     margin-top: 50px;
     height: 50px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    font-size: 25px;
+}
+#options:hover {
+    transform: scale(1.05);
+    color: rgb(214, 17, 17); 
+    text-shadow: 0 0 5px rgb(214, 17, 17) ,     
+    0 0 10px rgb(214, 17, 17) ,  
+    0 0 20px rgb(214, 17, 17);
 }
 
 #participants {
     display: flex;             
     justify-content: center !important;    
     align-items: center !important;                  
-    background-color: #f0f0f0;
+    background-color: #a58a8a;
     width: 400px;
     margin: auto;
     margin-top: 50px;
     height: 50px;
+    border-radius: 10px;
+    transition: transform 0.3s ease;
+    font-size: 25px;
+}
+#participants:hover {
+    transform: scale(1.05);
+    color: rgb(214, 17, 17); 
+    text-shadow: 0 0 5px rgb(214, 17, 17) ,     
+    0 0 10px rgb(214, 17, 17) ,  
+    0 0 20px rgb(214, 17, 17);
 }
 
 footer {
@@ -50,5 +81,9 @@ footer {
     color: white;
     padding: 10px;
     text-align: center;
+    
 }
 
+body {
+    background-color: rgb(39, 4, 4);
+}
