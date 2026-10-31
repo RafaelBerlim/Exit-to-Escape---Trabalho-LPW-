@@ -6,17 +6,13 @@
     <title>Exit to Escape</title>
     <link rel="icon" href="imgs/porta_exit.jpe">
 
-    <!-- Fontes - Montserrat -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
-    <!-- Creepster -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Creepster&display=swap" rel="stylesheet">
-
-    <!-- Press Start 2P -->
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -31,14 +27,73 @@
     <header><h1>Exit to Escape!</h1></header>
 
     <main>
-        <p id="start">Start</p>
-        <p id="options">Options</p>
-        <p id="participants">Participants</p>
+        <div class="menu">
+            <p id="start"><a href="primeirafase.html" class="btn">Start</a></p>
+            <p id="options"><a href="opcoes.html" class="btn">Options</a></p>
+            <p id="participants"><a href="participantes.html" class="btn">Participants</a></p>
+        </div>
+
+        <div class="porta" aria-hidden="true">
+            <svg viewBox="0 0 420 520" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="parede" gradientUnits="userSpaceOnUse" x1="60" y1="0" x2="420" y2="0">
+                        <stop offset="0" stop-color="#090202"/>
+                        <stop offset="1" stop-color="#1e0808"/>
+                    </linearGradient>
+                    <radialGradient id="fundoLuz" cx="0.5" cy="0.5" r="0.5">
+                        <stop offset="0" stop-color="#6a0a0a" stop-opacity="0.55"/>
+                        <stop offset="1" stop-color="#6a0a0a" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="madeira" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#220e06"/>
+                        <stop offset="0.5" stop-color="#3d1a0c"/>
+                        <stop offset="1" stop-color="#2b1208"/>
+                    </linearGradient>
+                    <linearGradient id="interior" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0" stop-color="#d41a1a"/>
+                        <stop offset="1" stop-color="#3a0505"/>
+                    </linearGradient>
+                    <linearGradient id="chao" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#ff1a1a" stop-opacity="0.6"/>
+                        <stop offset="1" stop-color="#ff1a1a" stop-opacity="0"/>
+                    </linearGradient>
+                </defs>
+
+                <rect x="0" y="0" width="60" height="520" fill="#080202"/>
+                <circle cx="30" cy="260" r="60" fill="url(#fundoLuz)"/>
+
+                <polygon points="60,247 420,20 420,0 60,0" fill="#0f0404"/>
+                <polygon points="60,273 420,500 420,520 60,520" fill="#0b0303"/>
+
+                <polygon points="60,247 420,20 420,500 60,273" fill="url(#parede)"/>
+
+                <g class="placa-exit" transform="matrix(0.7 -0.47 0 1 245 134)">
+                    <rect x="0" y="0" width="120" height="36" rx="4" fill="#140202" stroke="#780a0a" stroke-width="3"/>
+                    <text x="60" y="26" text-anchor="middle" font-family="'Press Start 2P', monospace" font-size="20" fill="#ff2a2a">EXIT</text>
+                </g>
+
+                <polygon points="210,191.3 340,138.8 340,449.5 210,367.4" fill="url(#interior)"/>
+
+                <polygon points="210,367 255,388 400,520 100,520" fill="url(#chao)" class="luz-baixo"/>
+
+                <polygon points="340,142 255,185 255,388 340,446" fill="url(#madeira)"/>
+
+                <polygon points="327.3,171.6 301.8,182 301.8,269.9 327.3,269.8" fill="none" stroke="#150602" stroke-width="3"/>
+                <polygon points="293.3,185.5 267.8,196 267.8,270.2 293.3,270" fill="none" stroke="#150602" stroke-width="3"/>
+                <polygon points="327.3,298.7 301.8,295.8 301.8,399.2 327.3,414.2" fill="none" stroke="#150602" stroke-width="3"/>
+                <polygon points="293.3,294.9 267.8,292 267.8,379.3 293.3,394.3" fill="none" stroke="#150602" stroke-width="3"/>
+
+                <line x1="255" y1="185" x2="255" y2="388" stroke="#ff2a2a" stroke-width="2.5" opacity="0.85"/>
+
+                <circle cx="262" cy="287" r="5" fill="#a58a8a"/>
+                <circle cx="262" cy="287" r="2" fill="#5c4a4a"/>
+
+                <polygon points="210,191.3 340,138.8 340,449.5 210,367.4" fill="none" stroke="#1b0906" stroke-width="6" stroke-linejoin="round"/>
+            </svg>
+        </div>
     </main>
 
     <footer><p>&copy; 2026 Todos os direitos reservados.</p></footer>
 
-
-    
 </body>
 </html>
