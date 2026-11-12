@@ -175,3 +175,19 @@
     color: #a58a8a;
     font-size: 12px;
 }
+
+
+.lanterna {
+    position: absolute;
+    bottom: 125px;
+    left: 30%;
+    border: none;
+    background: transparent;
+    font-size: 32px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.lanterna:hover {
+    transform: scale(1.2);
+}
