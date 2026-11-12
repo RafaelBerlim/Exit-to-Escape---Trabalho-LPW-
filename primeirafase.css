@@ -1,3 +1,4 @@
+
 .fase {
     display: flex;
     flex-direction: column;
@@ -140,4 +141,37 @@
     .introducao p {
         font-size: 9px;
     }
+}
+
+.objetivo {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px;
+    box-sizing: border-box;
+    border: 1px solid #4a1111;
+    border-radius: 8px;
+    background-color: rgba(25, 5, 5, 0.8);
+    color: #c9baba;
+    text-align: center;
+}
+
+.objetivo h3 {
+    color: #d61111;
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+}
+
+.objetivo h2 {
+    color: #d61111;
+    font-size: 22px;
+}
+
+.objetivo p {
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.objetivo .status {
+    color: #a58a8a;
+    font-size: 12px;
 }
