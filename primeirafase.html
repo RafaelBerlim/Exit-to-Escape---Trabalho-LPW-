@@ -3,84 +3,120 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Capítulo 1 - O Fechamento</title>
+    <title>Fase 1 - Hotel Alvorada</title>
     <link rel="icon" href="imgs/porta_exit.jpe">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Press+Start+2P&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="index.css">
     <link rel="stylesheet" href="primeirafase.css">
 </head>
 
 <body>
 
-    <header>
-        <h1>O Fechamento</h1>
-    </header>
+    <div id="jogo-wrap">
 
-    <main class="fase">
+        <canvas id="jogo" width="960" height="540"></canvas>
 
-        <section class="cenario">
+        <div id="hud" class="oculto">
 
-            <div class="luz-teto"></div>
-
-            <div class="porta-cenario">
-                <div class="placa">EXIT</div>
-                <div class="macaneta"></div>
+            <div id="inventario">
+                <div class="slot ativo" data-i="0"><canvas width="44" height="44"></canvas><b>1</b></div>
+                <div class="slot" data-i="1"><canvas width="44" height="44"></canvas><b>2</b></div>
+                <div class="slot" data-i="2"><canvas width="44" height="44"></canvas><b>3</b></div>
+                <div id="item-nome"></div>
             </div>
 
-            <div class="mesa"></div>
+            <div id="painel-direito">
+                <div id="tempo">30:00</div>
+                <div id="bateria">
+                    <span class="rotulo-bat">LANTERNA</span>
+                    <div class="barra"><div id="bateria-nivel"></div></div>
+                    <span id="bateria-pct">100%</span>
+                </div>
+                <div id="papeis">Papéis 0/7</div>
+            </div>
 
-            <div class="cadeira"></div>
+            <div id="mensagem"></div>
+            <div id="dica-interacao"></div>
+            <div id="controles-dica">A/D mover &middot; Espaço pular &middot; W/S escada &middot; E interagir &middot; F lanterna &middot; Q soltar &middot; P pausa</div>
+        </div>
 
-            <button class="lanterna" id="lanterna" title="Pegar lanterna">
-    🔦
-</button>
+        <div id="vinheta"></div>
 
-        </section>
-
-        <section class="introducao">
-            <p>CAPÍTULO 1</p>
-
-            <h2>03:17 AM</h2>
-
-            <p>
-                Você desperta em uma sala de jantar vazia.
-                As luzes estão falhando e a porta principal
-                parece estar trancada.
+        <div id="tela-inicio" class="tela ativa">
+            <h1>Hotel Alvorada</h1>
+            <h2>Capítulo 1 &mdash; Quarto 204</h2>
+            <p class="historia">
+                Você acorda sozinho em um quarto de hotel abandonado. A porta está trancada,
+                o telefone está mudo e o relógio do corredor parou.
+                Dizem que algo terrível aconteceu aqui. Você tem <strong>30 minutos</strong>
+                para encontrar a saída antes que <strong>ele</strong> volte.
             </p>
+            <div class="controles">
+                <span><b>A / D</b> ou <b>&larr; &rarr;</b> mover</span>
+                <span><b>Espaço</b> pular</span>
+                <span><b>W / S</b> ou <b>&uarr; &darr;</b> subir/descer escadas</span>
+                <span><b>E</b> interagir / usar item selecionado</span>
+                <span><b>1 2 3</b> ou clique: selecionar item</span>
+                <span><b>Q</b> soltar item &nbsp; <b>F</b> ligar/desligar lanterna</span>
+                <span><b>Mouse</b> aponta a lanterna &nbsp; <b>P</b> pausa</span>
+            </div>
+            <button class="btn" id="btn-comecar">Começar (Enter)</button>
+            <a class="link-menu" href="index.html">Voltar ao menu</a>
+        </div>
 
-            <p>
-                Você não se lembra de como chegou aqui.
-            </p>
+        <div id="tela-pausa" class="tela">
+            <h1>Pausado</h1>
+            <button class="btn" id="btn-continuar">Continuar</button>
+            <button class="btn" id="btn-reiniciar-pausa">Reiniciar fase</button>
+            <a class="btn" href="index.html">Voltar ao menu</a>
+        </div>
 
-            <a href="index.html" class="voltar">Voltar ao menu</a>
-        </section>
+        <div id="tela-susto" class="tela">
+            <canvas id="canvas-susto" width="960" height="540"></canvas>
+        </div>
 
-<section class="objetivo">
+        <div id="tela-gameover" class="tela">
+            <h1 class="vermelho">Game Over</h1>
+            <p class="historia">O tempo acabou. Ele te encontrou antes que você conseguisse sair do hotel...</p>
+            <button class="btn" id="btn-tentar">Tentar novamente</button>
+            <a class="btn" href="index.html">Voltar ao menu</a>
+        </div>
 
-    <h3>OBJETIVO ATUAL</h3>
+        <div id="tela-parabens" class="tela">
+            <h1 class="dourado">Congratulations!</h1>
+            <h2>Você escapou do Hotel Alvorada.</h2>
+            <p class="historia" id="parabens-tempo"></p>
+        </div>
 
-    <h2 id="objetivoTexto">Encontre uma lanterna.</h2>
+        <div id="tela-transicao" class="tela preta">
+            <p class="historia">Fim da Fase 1</p>
+            <p class="historia">Voltando ao menu principal...</p>
+            <div class="carregando"><div></div></div>
+        </div>
 
-    <p>
-        A iluminação do restaurante está comprometida.
-        Você precisa encontrar uma fonte de luz para
-        explorar o ambiente.
-    </p>
+        <div id="modal-papel" class="tela">
+            <div class="folha">
+                <h3 id="papel-titulo"></h3>
+                <p id="papel-texto"></p>
+                <span class="fechar">[E] ou [Esc] para fechar</span>
+            </div>
+        </div>
 
-    <p class="status" id="statusObjetivo">Missão não concluída</p>
+        <div id="modal-cofre" class="tela">
+            <div class="teclado">
+                <h3>Cofre do Gerente</h3>
+                <p class="inscricao">Inscrição na porta: &ldquo;A hora em que tudo parou.&rdquo;</p>
+                <div id="visor">----</div>
+                <div id="grade-teclas"></div>
+                <p id="cofre-msg"></p>
+                <span class="fechar">Digite 4 dígitos &middot; Enter confirma &middot; Esc sai</span>
+            </div>
+        </div>
 
-</section>
-
-
-    </main>
-
-    <footer>
-        <p>© 2026 Todos os direitos reservados.</p>
-    </footer>
+    </div>
 
     <script src="primeirafase.js"></script>
 </body>
