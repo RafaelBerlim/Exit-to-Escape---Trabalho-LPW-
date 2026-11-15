@@ -139,13 +139,28 @@
         modalCofre: $('modal-cofre'), visor: $('visor'), grade: $('grade-teclas'), cofreMsg: $('cofre-msg')
     };
 
-    let actx = null, mestre = null, bufRuido = null;
+    let actx = null, mestre = null, musica = null, efeitos = null, bufRuido = null;
 
     function iniciarAudio() {
         if (actx) { if (actx.state === 'suspended') actx.resume(); return; }
         try {
             actx = new (window.AudioContext || window.webkitAudioContext)();
-            mestre = actx.createGain(); mestre.gain.value = 0.7; mestre.connect(actx.destination);
+            mestre = actx.createGain();
+            musica = actx.createGain();
+            efeitos = actx.createGain();
+
+        mestre.gain.value = 1;
+        musica.gain.value = (Number(localStorage.getItem("volumeMusica") || 70)) / 100;
+        efeitos.gain.value = (Number(localStorage.getItem("volumeEfeitos") || 70)) / 100;
+
+if (localStorage.getItem("audioAtivo") === "false") {
+    musica.gain.value = 0;
+    efeitos.gain.value = 0;
+}
+
+            mestre.connect(actx.destination);
+            musica.connect(mestre);
+            efeitos.connect(mestre);        
             bufRuido = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
             const d = bufRuido.getChannelData(0);
             for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -156,7 +171,7 @@
                 const o = actx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = fr;
                 o.connect(f); o.start();
             });
-            f.connect(g); g.connect(mestre);
+            f.connect(g); g.connect(musica);
             agendarRangidos();
         } catch (e) { actx = null; }
     }
@@ -171,7 +186,7 @@
         g.gain.setValueAtTime(0.0001, t0);
         g.gain.exponentialRampToValueAtTime(vol, t0 + Math.min(0.03, dur / 3));
         g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-        o.connect(g); g.connect(mestre); o.start(t0); o.stop(t0 + dur + 0.05);
+        o.connect(g); g.connect(efeitos); o.start(t0); o.stop(t0 + dur + 0.05);
     }
 
     function ruido(dur, vol, freq, tipoFiltro, atraso) {
@@ -181,7 +196,7 @@
         const f = actx.createBiquadFilter(); f.type = tipoFiltro || 'lowpass'; f.frequency.value = freq || 800;
         const g = actx.createGain();
         g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
-        s.connect(f); f.connect(g); g.connect(mestre); s.start(t0); s.stop(t0 + dur + 0.05);
+        s.connect(f); f.connect(g); g.connect(efeitos); s.start(t0); s.stop(t0 + dur + 0.05);
     }
 
     const SOM = {
