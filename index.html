@@ -22,16 +22,18 @@
     <!-- Atenção, sempre deixem o css como o último linkado pra evitar ordem errada de carregamento -->
 
     <link rel="stylesheet" href="index.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="menu.js" defer></script>
 </head>
 
-<body>
-    <header><h1>Exit to Escape!</h1></header>
+<body class="home-page">
+    <header class="site-header"><span class="header-mark" aria-hidden="true">✦</span><h1>Exit to Escape!</h1><span class="header-mark" aria-hidden="true">✦</span></header>
 
     <main>
-        <div class="menu">
-            <p id="start"><a href="primeirafase.html" class="btn">Start</a></p>
-            <p id="options"><a href="opcoes.html" class="btn">Options</a></p>
-            <p id="participants"><a href="participantes.html" class="btn">Participants</a></p>
+        <div class="menu" aria-label="Menu principal">
+            <p id="start" class="menu-item"><a href="primeirafase.html" class="btn">Start</a></p>
+            <p id="options" class="menu-item"><a href="opcoes.html" class="btn">Options</a></p>
+            <p id="participants" class="menu-item"><a href="participantes.html" class="btn">Participants</a></p>
         </div>
 
         <div class="porta" aria-hidden="true">
@@ -94,7 +96,7 @@
         </div>
     </main>
 
-    <footer><p>&copy; 2026 Todos os direitos reservados.</p></footer>
+    <footer class="site-footer"><p>&copy; 2026 Todos os direitos reservados.</p></footer>
 
 </body>
 </html>
