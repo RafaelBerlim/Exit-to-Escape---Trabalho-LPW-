@@ -20,6 +20,18 @@
     const CODIGO_COFRE = '0317';
     const TOTAL_PAPEIS = 7;
 
+
+    const SKINS = {
+        davi:   { nome: 'Davi',   pele: '#d9b08c', cabelo: '#2a1a10', estilo: 'curto', corpo: '#1b1c26', corpoEsc: '#14151d', calcaMa: '#0e0e15', calcaMb: '#17171f', sapato: '#050505', detalhe: 'gravata', boca: '#8a5a4a' },
+        lucas:  { nome: 'Lucas',  pele: '#8a5a3c', cabelo: '#0c0806', estilo: 'curto', corpo: '#2c4a78', corpoEsc: '#223a5e', calcaMa: '#3a3a40', calcaMb: '#46464e', sapato: '#e6e6e6', detalhe: 'capuz', boca: '#5a3426' },
+        marina: { nome: 'Marina', pele: '#e8c4a4', cabelo: '#120a0a', estilo: 'longo', corpo: '#8a1a22', corpoEsc: '#6a1218', calcaMa: '#1a1a22', calcaMb: '#22222c', sapato: '#050505', detalhe: 'saia', boca: '#b04050' },
+        julia:  { nome: 'Júlia',  pele: '#c99672', cabelo: '#9a4a1a', estilo: 'rabo',  corpo: '#3a5a3a', corpoEsc: '#2c462c', calcaMa: '#2a3040', calcaMb: '#343a4c', sapato: '#4a2a14', detalhe: 'nenhum', boca: '#a04a4a' }
+    };
+    const SKIN_PADRAO = 'davi';
+    const ORDEM_SKINS = ['davi', 'lucas', 'marina', 'julia'];
+    let skinAtual = localStorage.getItem('skinJogador');
+    if (!SKINS[skinAtual]) skinAtual = SKIN_PADRAO;
+
     const ITENS = {
         chaveLatao:   { nome: 'Chave de Latão',  dica: 'Tem o número 204 gravado.', cor: '#d4a72c' },
         chavePequena: { nome: 'Chave Pequena',   dica: 'Parece servir em um armário.', cor: '#9fb0b8' },
@@ -138,7 +150,7 @@
         papeis: $('papeis'), msg: $('mensagem'), dica: $('dica-interacao'),
         itemNome: $('item-nome'), vinheta: $('vinheta'),
         slots: Array.prototype.slice.call(document.querySelectorAll('.slot')),
-        telaInicio: $('tela-inicio'), telaPausa: $('tela-pausa'), telaSusto: $('tela-susto'),
+        telaInicio: $('tela-inicio'), telaSkin: $('tela-skin'), telaPausa: $('tela-pausa'), telaSusto: $('tela-susto'),
         telaGameover: $('tela-gameover'), telaParabens: $('tela-parabens'),
         telaTransicao: $('tela-transicao'), parabensTempo: $('parabens-tempo'),
         modalPapel: $('modal-papel'), papelTitulo: $('papel-titulo'), papelTexto: $('papel-texto'),
@@ -1210,19 +1222,25 @@ if (localStorage.getItem("audioAtivo") === "false") {
         }
     }
 
-    function desenharJogador(c, p) {
+    function desenharJogador(c, p, sk, aim, luzOn) {
+        sk = sk || SKINS[skinAtual];
+        if (aim === undefined) aim = jogo.aim;
+        if (luzOn === undefined) luzOn = jogo.lanterna && jogo.bateria > 0;
         c.save();
         c.translate(Math.round(p.x), Math.round(p.y));
         c.fillStyle = 'rgba(0,0,0,0.35)'; c.beginPath(); c.ellipse(0, 0, 14, 3, 0, 0, Math.PI * 2); c.fill();
 
         if (p.escada) {
             const sw = Math.sin(p.animT * 9);
-            R(c, -8, -24 + (sw > 0 ? 3 : 0), 7, 24 - (sw > 0 ? 3 : 0), '#101018');
-            R(c, 1, -24 + (sw > 0 ? 0 : 3), 7, 24 - (sw > 0 ? 0 : 3), '#16161f');
-            R(c, -10, -46, 20, 24, '#1b1c26');
-            R(c, -7, -62, 14, 16, '#2a1a10');
-            R(c, -13, -62 + (sw > 0 ? 0 : 7), 4, 18, '#1b1c26');
-            R(c, 9, -62 + (sw > 0 ? 7 : 0), 4, 18, '#1b1c26');
+            R(c, -8, -24 + (sw > 0 ? 3 : 0), 7, 24 - (sw > 0 ? 3 : 0), sk.calcaMa);
+            R(c, 1, -24 + (sw > 0 ? 0 : 3), 7, 24 - (sw > 0 ? 0 : 3), sk.calcaMb);
+            R(c, -10, -46, 20, 24, sk.corpo);
+            if (sk.detalhe === 'saia') R(c, -10, -26, 20, 8, sk.corpo);
+            R(c, -7, -62, 14, 16, sk.cabelo);
+            if (sk.estilo === 'longo') R(c, -8, -48, 16, 18, sk.cabelo);
+            if (sk.estilo === 'rabo') R(c, -2, -58, 4, 20, sk.cabelo);
+            R(c, -13, -62 + (sw > 0 ? 0 : 7), 4, 18, sk.corpo);
+            R(c, 9, -62 + (sw > 0 ? 7 : 0), 4, 18, sk.corpo);
             c.restore();
             return;
         }
@@ -1231,30 +1249,54 @@ if (localStorage.getItem("audioAtivo") === "false") {
         const anda = p.andando && p.noChao;
         const sw = anda ? Math.sin(p.animT * 11) : 0;
         const ar = !p.noChao;
-        const luzOn = jogo.lanterna && jogo.bateria > 0;
 
         const lb = ar ? -4 : sw * 6, lf = ar ? 5 : -sw * 6;
-        R(c, -8 + lb, -24, 7, 24, '#0e0e15'); R(c, -9 + lb, -4, 10, 4, '#050505');
-        R(c, 1 + lf, -24, 7, 24, '#17171f'); R(c, 0 + lf, -4, 10, 4, '#050505');
-        R(c, -12, -44 + (ar ? -6 : 0), 5, 20, '#14151d');
-        R(c, -10, -46, 20, 24, '#1b1c26');
-        R(c, -10, -46, 3, 24, '#14151d');
-        c.fillStyle = '#e6e6e6';
-        c.beginPath(); c.moveTo(-2, -46); c.lineTo(5, -46); c.lineTo(1.5, -34); c.closePath(); c.fill();
-        R(c, 0, -44, 3, 13, '#a31212');
-        R(c, 4, -30, 2, 2, '#444');
-        R(c, -7, -62, 14, 16, '#d9b08c');
-        R(c, -8, -65, 16, 7, '#2a1a10'); R(c, -8, -62, 4, 10, '#2a1a10');
+        R(c, -8 + lb, -24, 7, 24, sk.calcaMa); R(c, -9 + lb, -4, 10, 4, sk.sapato);
+        R(c, 1 + lf, -24, 7, 24, sk.calcaMb); R(c, 0 + lf, -4, 10, 4, sk.sapato);
+        if (sk.detalhe === 'saia') R(c, -9, -28, 18, 10, sk.corpoEsc);
+        R(c, -12, -44 + (ar ? -6 : 0), 5, 20, sk.corpoEsc);
+        R(c, -10, -46, 20, 24, sk.corpo);
+        R(c, -10, -46, 3, 24, sk.corpoEsc);
+        if (sk.detalhe === 'gravata') {
+            c.fillStyle = '#e6e6e6';
+            c.beginPath(); c.moveTo(-2, -46); c.lineTo(5, -46); c.lineTo(1.5, -34); c.closePath(); c.fill();
+            R(c, 0, -44, 3, 13, '#a31212');
+            R(c, 4, -30, 2, 2, '#444');
+        } else if (sk.detalhe === 'capuz') {
+            R(c, -9, -47, 18, 4, sk.corpoEsc);
+            R(c, 1, -42, 1, 8, '#c8d0dc'); R(c, 4, -42, 1, 6, '#c8d0dc');
+        } else if (sk.detalhe === 'saia') {
+            R(c, -4, -46, 8, 3, sk.pele);
+        }
+        if (sk.estilo === 'longo') R(c, -10, -62, 6, 28, sk.cabelo);
+        if (sk.estilo === 'rabo') {
+            const bal = anda ? Math.sin(p.animT * 11) * 2 : 0;
+            R(c, -12, -64, 6, 6, sk.cabelo);
+            R(c, -14 + bal, -58, 5, 16, sk.cabelo);
+        }
+        R(c, -7, -62, 14, 16, sk.pele);
+        R(c, -8, -65, 16, 7, sk.cabelo); R(c, -8, -62, 4, 10, sk.cabelo);
+        if (sk.estilo === 'longo') R(c, -9, -60, 4, 18, sk.cabelo);
         R(c, 2, -56, 3, 3, '#fff'); R(c, 3.5, -55.5, 1.6, 2.4, '#111');
-        R(c, 2, -49, 4, 1.5, '#8a5a4a');
-        const la = Math.atan2(Math.sin(jogo.aim), Math.cos(jogo.aim) * p.dir);
+        R(c, 2, -49, 4, 1.5, sk.boca);
+        const la = Math.atan2(Math.sin(aim), Math.cos(aim) * p.dir);
         c.save(); c.translate(4, -41); c.rotate(la);
-        R(c, 0, -3, 13, 6, '#1b1c26');
-        R(c, 12, -3, 4, 6, '#d9b08c');
+        R(c, 0, -3, 13, 6, sk.corpo);
+        R(c, 12, -3, 4, 6, sk.pele);
         R(c, 14, -4, 11, 8, '#55585e');
         R(c, 25, -5, 4, 10, '#9a9da3');
         if (luzOn) R(c, 29, -4, 2, 8, '#fff3b0');
         c.restore();
+        c.restore();
+    }
+
+    function desenharPreviewSkin(cv, id) {
+        const c = cv.getContext('2d');
+        c.clearRect(0, 0, cv.width, cv.height);
+        c.save();
+        c.translate(cv.width / 2 - 4, cv.height - 14);
+        c.scale(1.7, 1.7);
+        desenharJogador(c, { x: 0, y: 0, dir: 1, andando: false, noChao: true, animT: 0, escada: null }, SKINS[id], 0.35, false);
         c.restore();
     }
 
@@ -1511,9 +1553,36 @@ if (localStorage.getItem("audioAtivo") === "false") {
         }, 4800);
     }
 
+    function marcarSkin() {
+        Array.prototype.forEach.call(el.telaSkin.querySelectorAll('.skin-card'), function (card) {
+            card.classList.toggle('ativo', card.dataset.skin === skinAtual);
+        });
+    }
+
+    function escolherSkin(id) {
+        if (!SKINS[id]) return;
+        skinAtual = id;
+        try { localStorage.setItem('skinJogador', id); } catch (e) {}
+        marcarSkin();
+    }
+
+    function abrirSkin() {
+        el.telaInicio.classList.remove('ativa');
+        el.telaSkin.classList.add('ativa');
+        modo = 'skin';
+        marcarSkin();
+    }
+
+    function voltarSkin() {
+        el.telaSkin.classList.remove('ativa');
+        el.telaInicio.classList.add('ativa');
+        modo = 'inicio';
+    }
+
     function comecar() {
         iniciarAudio();
         el.telaInicio.classList.remove('ativa');
+        el.telaSkin.classList.remove('ativa');
         el.hud.classList.remove('oculto');
         modo = 'jogando';
         msg('Você acorda no quarto 204. A porta está trancada. Procure uma chave por aqui...', 5);
@@ -1539,7 +1608,15 @@ if (localStorage.getItem("audioAtivo") === "false") {
 
     function onTecla(e) {
         const c = e.code;
-        if (modo === 'inicio') { if (c === 'Enter' || c === 'Space') comecar(); return; }
+        if (modo === 'inicio') { if (c === 'Enter' || c === 'Space') abrirSkin(); return; }
+        if (modo === 'skin') {
+            const i = ORDEM_SKINS.indexOf(skinAtual);
+            if (c === 'KeyD' || c === 'ArrowRight') escolherSkin(ORDEM_SKINS[(i + 1) % ORDEM_SKINS.length]);
+            else if (c === 'KeyA' || c === 'ArrowLeft') escolherSkin(ORDEM_SKINS[(i + ORDEM_SKINS.length - 1) % ORDEM_SKINS.length]);
+            else if (c === 'Enter' || c === 'Space') comecar();
+            else if (c === 'Escape') voltarSkin();
+            return;
+        }
         if (modo === 'leitura') { if (c === 'KeyE' || c === 'Escape' || c === 'Enter' || c === 'Space') fecharPapel(); return; }
         if (modo === 'cofre') {
             if (c === 'Escape') fecharCofre();
@@ -1588,7 +1665,13 @@ if (localStorage.getItem("audioAtivo") === "false") {
         s.addEventListener('click', function () { if (modo === 'jogando') selecionar(parseInt(s.dataset.i, 10)); });
     });
 
-    $('btn-comecar').addEventListener('click', function () { this.blur(); comecar(); });
+    $('btn-comecar').addEventListener('click', function () { this.blur(); abrirSkin(); });
+    $('btn-jogar').addEventListener('click', function () { this.blur(); comecar(); });
+    $('btn-voltar-skin').addEventListener('click', function () { this.blur(); voltarSkin(); });
+    Array.prototype.forEach.call(el.telaSkin.querySelectorAll('.skin-card'), function (card) {
+        desenharPreviewSkin(card.querySelector('canvas'), card.dataset.skin);
+        card.addEventListener('click', function () { escolherSkin(card.dataset.skin); });
+    });
     $('btn-continuar').addEventListener('click', function () { this.blur(); retomar(); });
     $('btn-reiniciar-pausa').addEventListener('click', function () { this.blur(); reiniciar(); });
     $('btn-tentar').addEventListener('click', function () { this.blur(); reiniciar(); });
@@ -1618,4 +1701,4 @@ if (localStorage.getItem("audioAtivo") === "false") {
             .then(construirFundo).catch(function () {});
     }
     requestAnimationFrame(loop);
-})();
+})();   
