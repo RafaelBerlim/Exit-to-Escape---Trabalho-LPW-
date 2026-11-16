@@ -29,11 +29,16 @@
             </div>
 
             <div id="painel-direito">
-                <div id="tempo">30:00</div>
+                <div id="tempo">10:00</div>
                 <div id="bateria">
                     <span class="rotulo-bat">LANTERNA</span>
                     <div class="barra"><div id="bateria-nivel"></div></div>
                     <span id="bateria-pct">100%</span>
+                </div>
+                <div id="estamina">
+                    <span class="rotulo-bat">ESTAMINA</span>
+                    <div class="barra"><div id="estamina-nivel"></div></div>
+                    <span id="estamina-pct">100%</span>
                 </div>
                 <div id="papeis">Papéis 0/7</div>
             </div>
@@ -51,7 +56,7 @@
             <p class="historia">
                 Você acorda sozinho em um quarto de hotel abandonado. A porta está trancada,
                 o telefone está mudo e o relógio do corredor parou.
-                Dizem que algo terrível aconteceu aqui. Você tem <strong>30 minutos</strong>
+                Dizem que algo terrível aconteceu aqui. Você tem <strong>10 minutos</strong>
                 para encontrar a saída antes que <strong>ele</strong> volte.
             </p>
             <div class="controles">
@@ -61,6 +66,9 @@
                 <span><b>E</b> interagir / usar item selecionado</span>
                 <span><b>1 2 3</b> ou clique: selecionar item</span>
                 <span><b>Q</b> soltar item &nbsp; <b>F</b> ligar/desligar lanterna</span>
+                <span><b>Bateria</b> guarde no inventário e use com <b>E</b></span>
+                <span><b>Sem lanterna</b> a estamina cai: no escuro você morre!</span>
+                <span><b>Monstro</b> mire a luz nele para fazê-lo sumir</span>
                 <span><b>Mouse</b> aponta a lanterna &nbsp; <b>P</b> pausa</span>
             </div>
             <button class="btn" id="btn-comecar">Começar (Enter)</button>
@@ -80,7 +88,7 @@
 
         <div id="tela-gameover" class="tela">
             <h1 class="vermelho">Game Over</h1>
-            <p class="historia">O tempo acabou. Ele te encontrou antes que você conseguisse sair do hotel...</p>
+            <p class="historia" id="gameover-texto">O tempo acabou. Ele te encontrou antes que você conseguisse sair do hotel...</p>
             <button class="btn" id="btn-tentar">Tentar novamente</button>
             <a class="btn" href="index.html">Voltar ao menu</a>
         </div>
