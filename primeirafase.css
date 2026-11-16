@@ -1,7 +1,7 @@
 * {
     box-sizing: border-box;
 }
- 
+
 html,
 body {
     margin: 0;
@@ -11,13 +11,13 @@ body {
     font-family: "Press Start 2P", monospace;
     color: #c9baba;
 }
- 
+
 body {
     display: flex;
     align-items: center;
     justify-content: center;
 }
- 
+
 #jogo-wrap {
     position: relative;
     width: min(100vw, calc(100vh * 16 / 9));
@@ -28,7 +28,7 @@ body {
     user-select: none;
     cursor: crosshair;
 }
- 
+
 #jogo,
 #canvas-susto {
     position: absolute;
@@ -37,20 +37,18 @@ body {
     height: 100%;
     display: block;
 }
- 
-/* ---------- HUD ---------- */
- 
+
 #hud {
     position: absolute;
     inset: 0;
     pointer-events: none;
     z-index: 5;
 }
- 
+
 #hud.oculto {
     display: none;
 }
- 
+
 #inventario {
     position: absolute;
     top: 1.6cqw;
@@ -60,7 +58,7 @@ body {
     gap: 0.7cqw;
     width: 20cqw;
 }
- 
+
 .slot {
     position: relative;
     width: 5.4cqw;
@@ -75,12 +73,12 @@ body {
     pointer-events: auto;
     transition: border-color 0.2s, box-shadow 0.2s;
 }
- 
+
 .slot canvas {
     width: 80%;
     height: 80%;
 }
- 
+
 .slot b {
     position: absolute;
     top: 0.25cqw;
@@ -89,12 +87,12 @@ body {
     font-weight: 400;
     color: #8a6a6a;
 }
- 
+
 .slot.ativo {
     border-color: #d61111;
     box-shadow: 0 0 1.2cqw rgba(214, 17, 17, 0.7);
 }
- 
+
 #item-nome {
     width: 100%;
     min-height: 1.4cqw;
@@ -103,7 +101,7 @@ body {
     color: #d8c8c8;
     text-shadow: 0 0 0.5cqw #000, 0 0 0.5cqw #000;
 }
- 
+
 #painel-direito {
     position: absolute;
     top: 1.6cqw;
@@ -114,60 +112,83 @@ body {
     align-items: flex-end;
     gap: 0.8cqw;
 }
- 
+
 #tempo {
     font-size: 3cqw;
     color: #d61111;
     text-shadow: 0 0 1cqw rgba(214, 17, 17, 0.8);
     letter-spacing: 0.1cqw;
 }
- 
+
 #tempo.urgente {
     animation: pulsar 1s infinite;
 }
- 
-#bateria {
+
+#bateria,
+#estamina {
     display: flex;
     align-items: center;
     gap: 0.7cqw;
     font-size: 0.95cqw;
     text-shadow: 0 0 0.5cqw #000;
 }
- 
-#bateria .barra {
+
+#bateria .barra,
+#estamina .barra {
     width: 9cqw;
     height: 1.5cqw;
     border: 0.2cqw solid #8a6a6a;
     background: rgba(0, 0, 0, 0.7);
     padding: 0.15cqw;
 }
- 
+
 #bateria-nivel {
     height: 100%;
     width: 100%;
     background: #3fbf4f;
     transition: width 0.3s linear, background 0.3s;
 }
- 
+
 #bateria-nivel.baixa {
     background: #d9a21b;
 }
- 
+
 #bateria-nivel.critica {
     background: #d61111;
     animation: pulsar 0.6s infinite;
 }
- 
+
 #bateria.desligada {
     opacity: 0.5;
 }
- 
+
+#estamina-nivel {
+    height: 100%;
+    width: 100%;
+    background: #3f9fd9;
+    transition: width 0.3s linear, background 0.3s;
+}
+
+#estamina-nivel.baixa {
+    background: #d9a21b;
+}
+
+#estamina-nivel.critica {
+    background: #d61111;
+    animation: pulsar 0.6s infinite;
+}
+
+#estamina.drenando .rotulo-bat {
+    color: #d61111;
+    animation: pulsar 1s infinite;
+}
+
 #papeis {
     font-size: 1cqw;
     color: #a58a8a;
     text-shadow: 0 0 0.5cqw #000;
 }
- 
+
 #mensagem {
     position: absolute;
     left: 50%;
@@ -186,11 +207,11 @@ body {
     opacity: 0;
     transition: opacity 0.4s;
 }
- 
+
 #mensagem.visivel {
     opacity: 1;
 }
- 
+
 #dica-interacao {
     position: absolute;
     left: 50%;
@@ -203,11 +224,11 @@ body {
     transition: opacity 0.15s;
     white-space: nowrap;
 }
- 
+
 #dica-interacao.visivel {
     opacity: 1;
 }
- 
+
 #controles-dica {
     position: absolute;
     left: 1.6cqw;
@@ -215,7 +236,7 @@ body {
     font-size: 0.8cqw;
     color: rgba(165, 138, 138, 0.7);
 }
- 
+
 #vinheta {
     position: absolute;
     inset: 0;
@@ -224,9 +245,7 @@ body {
     z-index: 4;
     background: radial-gradient(ellipse at center, transparent 45%, rgba(170, 0, 0, 0.85) 100%);
 }
- 
-/* ---------- Telas e modais ---------- */
- 
+
 .tela {
     position: absolute;
     inset: 0;
@@ -241,15 +260,15 @@ body {
     z-index: 20;
     cursor: default;
 }
- 
+
 .tela.ativa {
     display: flex;
 }
- 
+
 .tela.preta {
     background: #000;
 }
- 
+
 .tela h1 {
     margin: 0;
     font-family: "Creepster", cursive;
@@ -260,24 +279,24 @@ body {
     text-shadow: 0 0 1cqw rgb(214, 17, 17), 0 0 2.4cqw rgba(214, 17, 17, 0.6);
     animation: tremer 4s infinite;
 }
- 
+
 .tela h1.vermelho {
     font-size: 8cqw;
 }
- 
+
 .tela h1.dourado {
     color: #e6c34a;
     text-shadow: 0 0 1cqw #e6c34a, 0 0 2.6cqw rgba(230, 195, 74, 0.6);
     font-size: 7.5cqw;
 }
- 
+
 .tela h2 {
     margin: 0;
     font-size: 1.5cqw;
     font-weight: 400;
     color: #a58a8a;
 }
- 
+
 .historia {
     max-width: 68cqw;
     margin: 0;
@@ -285,12 +304,12 @@ body {
     line-height: 2;
     color: #c9baba;
 }
- 
+
 .historia strong {
     color: #d61111;
     font-weight: 400;
 }
- 
+
 .controles {
     display: flex;
     flex-direction: column;
@@ -303,12 +322,12 @@ body {
     line-height: 1.4;
     color: #a58a8a;
 }
- 
+
 .controles b {
     color: #e6d8d8;
     font-weight: 400;
 }
- 
+
 .btn {
     display: inline-block;
     min-width: 26cqw;
@@ -324,32 +343,30 @@ body {
     box-shadow: 0 0 1.2cqw rgba(214, 17, 17, 0.35);
     transition: transform 0.25s, box-shadow 0.25s, background 0.25s, color 0.25s;
 }
- 
+
 .btn:hover {
     transform: scale(1.05);
     background: #c9a0a0;
     color: #d61111;
     box-shadow: 0 0 2.2cqw rgba(214, 17, 17, 0.8);
 }
- 
+
 .link-menu {
     font-size: 0.95cqw;
     color: #8a6a6a;
     text-decoration: none;
 }
- 
+
 .link-menu:hover {
     color: #d61111;
 }
- 
-/* Susto: ocupa toda a tela, sem moldura */
+
 #tela-susto {
     padding: 0;
     background: #000;
     z-index: 30;
 }
- 
-/* Folha de papel */
+
 .folha {
     width: 56cqw;
     max-width: 92%;
@@ -362,7 +379,7 @@ body {
     transform: rotate(-0.6deg);
     font-family: Georgia, "Times New Roman", serif;
 }
- 
+
 .folha h3 {
     margin: 0 0 1.4cqw;
     font-size: 1.9cqw;
@@ -371,14 +388,14 @@ body {
     border-bottom: 0.15cqw solid #7a6a4a;
     padding-bottom: 0.8cqw;
 }
- 
+
 .folha p {
     margin: 0;
     font-size: 1.45cqw;
     line-height: 1.7;
     white-space: pre-wrap;
 }
- 
+
 .fechar {
     display: block;
     margin-top: 1.6cqw;
@@ -387,8 +404,7 @@ body {
     color: #7a6a4a;
     text-align: center;
 }
- 
-/* Cofre */
+
 .teclado {
     width: 34cqw;
     padding: 2cqw;
@@ -401,25 +417,25 @@ body {
     align-items: center;
     gap: 1.1cqw;
 }
- 
+
 .teclado h3 {
     margin: 0;
     font-size: 1.3cqw;
     font-weight: 400;
     color: #d8dde0;
 }
- 
+
 .teclado .inscricao {
     margin: 0;
     font-size: 0.85cqw;
     line-height: 1.8;
     color: #9aa;
 }
- 
+
 .teclado .fechar {
     color: #7a8088;
 }
- 
+
 #visor {
     width: 100%;
     padding: 0.8cqw;
@@ -431,18 +447,18 @@ body {
     border: 0.2cqw solid #000;
     text-shadow: 0 0 0.8cqw #ff0000;
 }
- 
+
 #visor.erro {
     animation: tremer-forte 0.4s;
 }
- 
+
 #grade-teclas {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 0.7cqw;
     width: 100%;
 }
- 
+
 #grade-teclas button {
     padding: 0.9cqw 0;
     border: 0.2cqw solid #14161a;
@@ -453,19 +469,18 @@ body {
     font-size: 1.3cqw;
     cursor: pointer;
 }
- 
+
 #grade-teclas button:hover {
     background: #6a707a;
     color: #fff;
 }
- 
+
 #cofre-msg {
     margin: 0;
     min-height: 1.2cqw;
     font-size: 0.9cqw;
     color: #ff6060;
 }
- 
 
 .carregando {
     width: 40cqw;
@@ -473,34 +488,34 @@ body {
     border: 0.2cqw solid #4a1111;
     margin-top: 1cqw;
 }
- 
+
 .carregando div {
     height: 100%;
     width: 0;
     background: #d61111;
     box-shadow: 0 0 1cqw #d61111;
 }
- 
+
 #tela-transicao.ativa .carregando div {
     animation: carregar 3.4s linear forwards;
 }
- 
+
 @keyframes carregar {
     from { width: 0; }
     to { width: 100%; }
 }
- 
+
 @keyframes pulsar {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.35; }
 }
- 
+
 @keyframes tremer {
     0%, 94%, 100% { transform: translate(0, 0); }
     95% { transform: translate(-2px, 1px); }
     97% { transform: translate(2px, -1px); }
 }
- 
+
 @keyframes tremer-forte {
     0%, 100% { transform: translateX(0); }
     20% { transform: translateX(-8px); }
