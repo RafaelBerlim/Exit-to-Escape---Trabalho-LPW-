@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Entrar - Exit to Escape</title>
+    <link rel="icon" href="imgs/porta_exit.jpe">
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="login.css">
+</head>
+
+<body>
+    <header>
+        <h1>Exit to Escape!</h1>
+    </header>
+
+    <main>
+        <section class="painel">
+            <div class="abas">
+                <button type="button" class="aba ativa" data-aba="entrar">Entrar</button>
+                <button type="button" class="aba" data-aba="criar">Criar conta</button>
+            </div>
+
+            <form id="form-conta" autocomplete="off" novalidate>
+                <div class="campo">
+                    <label for="usuario">Usuário</label>
+                    <input type="text" id="usuario" maxlength="16" autocomplete="off" spellcheck="false">
+                </div>
+
+                <div class="campo">
+                    <label for="senha">Senha</label>
+                    <input type="password" id="senha" maxlength="32" autocomplete="off">
+                </div>
+
+                <div class="campo" id="campo-confirma" hidden>
+                    <label for="confirma">Confirmar senha</label>
+                    <input type="password" id="confirma" maxlength="32" autocomplete="off">
+                </div>
+
+                <label class="mostrar" for="mostrar">
+                    <input type="checkbox" id="mostrar"> Mostrar senha
+                </label>
+
+                <p id="mensagem" role="alert"></p>
+
+                <button type="submit" class="btn" id="btn-enviar">Entrar</button>
+            </form>
+        </section>
+    </main>
+
+    <div id="transicao" aria-live="polite">
+        <p class="bemvindo">Bem-vindo de volta,</p>
+        <h2 id="transicao-nome"></h2>
+        <div class="carregando"><div></div></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Todos os direitos reservados.</p>
+    </footer>
+
+    <script src="login.js"></script>
+</body>
+</html>

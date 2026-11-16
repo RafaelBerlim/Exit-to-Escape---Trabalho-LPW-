@@ -1,0 +1,266 @@
+[hidden] {
+    display: none !important;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background-color: rgb(8, 1, 1);
+    background-image:
+        radial-gradient(ellipse at 50% 50%, rgb(36, 4, 4) 0%, rgb(14, 2, 2) 55%, rgb(3, 0, 0) 100%);
+    background-attachment: fixed;
+    font-family: "Press Start 2P", system-ui;
+}
+
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100px;
+    background-color: rgba(8, 0, 0, 0.55);
+}
+
+h1 {
+    margin: 0;
+    font-family: 'Creepster', cursive;
+    font-size: 40px;
+    color: rgb(255, 0, 0);
+    letter-spacing: 3px;
+    text-shadow: 0 0 8px rgb(214, 17, 17),
+                 0 0 20px rgba(214, 17, 17, 0.6);
+    animation: tremer 4s infinite;
+}
+
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 170px);
+    padding: 20px 0 60px;
+}
+
+.painel {
+    width: 460px;
+    max-width: 90%;
+    padding: 30px;
+    box-sizing: border-box;
+    background-color: rgba(8, 0, 0, 0.75);
+    border: 2px solid rgb(100, 10, 10);
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(214, 17, 17, 0.25);
+}
+
+.abas {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+}
+
+.aba {
+    flex: 1;
+    padding: 12px 6px;
+    border: 2px solid rgb(100, 10, 10);
+    border-radius: 8px;
+    background: transparent;
+    color: #8a6a6a;
+    font-family: "Press Start 2P", system-ui;
+    font-size: 11px;
+    cursor: pointer;
+    transition: 0.25s;
+}
+
+.aba:hover {
+    color: rgb(214, 17, 17);
+}
+
+.aba.ativa {
+    background-color: rgb(40, 5, 5);
+    border-color: rgb(214, 17, 17);
+    color: #fff;
+    box-shadow: 0 0 12px rgba(214, 17, 17, 0.5);
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 22px;
+}
+
+.campo label {
+    color: #a58a8a;
+    font-size: 11px;
+}
+
+.campo input {
+    padding: 12px;
+    border: 2px solid rgb(100, 10, 10);
+    border-radius: 6px;
+    background-color: rgb(20, 2, 2);
+    color: #e6d8d8;
+    font-family: "Press Start 2P", system-ui;
+    font-size: 12px;
+    outline: none;
+}
+
+.campo input:focus {
+    border-color: rgb(214, 17, 17);
+    box-shadow: 0 0 10px rgba(214, 17, 17, 0.5);
+}
+
+.mostrar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 18px;
+    color: #8a6a6a;
+    font-size: 9px;
+    cursor: pointer;
+}
+
+.mostrar input {
+    accent-color: rgb(214, 17, 17);
+}
+
+#mensagem {
+    min-height: 32px;
+    margin: 0 0 14px;
+    font-size: 10px;
+    line-height: 1.7;
+    color: #ff6060;
+}
+
+#mensagem.ok {
+    color: #5fd16a;
+}
+
+#mensagem.tremer {
+    animation: tremer-forte 0.4s;
+}
+
+.btn {
+    display: block;
+    width: 100%;
+    padding: 15px 10px;
+    border: none;
+    border-radius: 8px;
+    background-color: #a58a8a;
+    color: #140202;
+    font-family: "Press Start 2P", system-ui;
+    font-size: 14px;
+    cursor: pointer;
+    box-shadow: 0 0 12px rgba(214, 17, 17, 0.35);
+    transition: transform 0.25s, box-shadow 0.25s, color 0.25s;
+}
+
+.btn:hover {
+    transform: scale(1.03);
+    color: rgb(214, 17, 17);
+    box-shadow: 0 0 22px rgba(214, 17, 17, 0.8);
+}
+
+.btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+}
+
+#transicao {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 20px;
+    text-align: center;
+    background: #000;
+}
+
+#transicao.ativa {
+    display: flex;
+}
+
+.bemvindo {
+    margin: 0;
+    color: #a58a8a;
+    font-size: 18px;
+    animation: aparecer 1s both;
+}
+
+#transicao h2 {
+    margin: 0;
+    font-family: 'Creepster', cursive;
+    font-weight: 400;
+    font-size: 72px;
+    word-break: break-word;
+    color: rgb(214, 17, 17);
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px rgb(214, 17, 17),
+                 0 0 28px rgba(214, 17, 17, 0.6);
+    animation: aparecer 1.2s 0.5s both, tremer 4s infinite;
+}
+
+.carregando {
+    width: min(420px, 80vw);
+    height: 16px;
+    margin-top: 20px;
+    border: 2px solid rgb(100, 10, 10);
+}
+
+.carregando div {
+    width: 0;
+    height: 100%;
+    background: rgb(214, 17, 17);
+    box-shadow: 0 0 10px rgb(214, 17, 17);
+}
+
+#transicao.ativa .carregando div {
+    animation: carregar 3s linear forwards;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    padding: 10px 0;
+    background-color: rgba(8, 0, 0, 0.7);
+    color: white;
+    text-align: center;
+}
+
+footer p {
+    margin: 0;
+    font-size: 10px;
+}
+
+@keyframes carregar {
+    from { width: 0; }
+    to { width: 100%; }
+}
+
+@keyframes aparecer {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes tremer {
+    0%, 94%, 100% { transform: translate(0, 0); }
+    95% { transform: translate(-2px, 1px); }
+    97% { transform: translate(2px, -1px); }
+}
+
+@keyframes tremer-forte {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+
+@media (max-width: 600px) {
+    #transicao h2 {
+        font-size: 44px;
+    }
+}
