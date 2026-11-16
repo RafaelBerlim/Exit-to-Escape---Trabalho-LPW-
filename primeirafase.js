@@ -8,8 +8,12 @@
     const NIVEIS = [CHAO.L2, CHAO.L1, CHAO.L0];
     const TETO = { 360: 0, 760: 400, 1160: 800 };
 
-    const TEMPO_TOTAL = 30 * 60;
-    const BATERIA_DURACAO = 5 * 60;
+    const TEMPO_TOTAL = 10 * 60;
+    const BATERIA_DURACAO = 2 * 60;
+    const ESTAMINA_DRENO = 1 / 25;
+    const ESTAMINA_RECUPERA = 1 / 8;
+    const MONSTRO_TEMPO_LUZ = 0.9;
+    const MONSTRO_VEL_BASE = 85;
     const BATERIA_GANHO = 0.6;
     const MAX_ITENS = 3;
     const GRAVIDADE = 1900, VEL_ANDAR = 190, VEL_PULO = 640, VEL_ESCADA = 150;
@@ -23,7 +27,7 @@
         fusivel:      { nome: 'Fusível',         dica: 'Deve caber em algum quadro de força.', cor: '#e8e2c8' },
         peDeCabra:    { nome: 'Pé de Cabra',     dica: 'Bom para arrancar tábuas.', cor: '#8a9aa6' },
         chaveSaida:   { nome: 'Chave da Saída',  dica: 'Pesada, com a palavra SAÍDA gravada.', cor: '#d61111' },
-        bateria:      { nome: 'Bateria',         dica: '', cor: '#3fbf4f' }
+        bateria:      { nome: 'Bateria',         dica: 'Selecione e aperte E para recarregar a lanterna.', cor: '#3fbf4f' }
     };
 
     const SECOES = {
@@ -129,6 +133,8 @@
     const el = {
         hud: $('hud'), tempo: $('tempo'), bateria: $('bateria'),
         batNivel: $('bateria-nivel'), batPct: $('bateria-pct'),
+        estamina: $('estamina'), estNivel: $('estamina-nivel'), estPct: $('estamina-pct'),
+        gameoverTexto: $('gameover-texto'),
         papeis: $('papeis'), msg: $('mensagem'), dica: $('dica-interacao'),
         itemNome: $('item-nome'), vinheta: $('vinheta'),
         slots: Array.prototype.slice.call(document.querySelectorAll('.slot')),
@@ -160,7 +166,7 @@ if (localStorage.getItem("audioAtivo") === "false") {
 
             mestre.connect(actx.destination);
             musica.connect(mestre);
-            efeitos.connect(mestre);        
+            efeitos.connect(mestre);
             bufRuido = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
             const d = bufRuido.getChannelData(0);
             for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
@@ -300,10 +306,11 @@ if (localStorage.getItem("audioAtivo") === "false") {
                  escada: null, animT: 0, andando: false, passoT: 0 },
             inv: [null, null, null], sel: 0,
             tempo: TEMPO_TOTAL, bateria: 1, lanterna: true, energia: false, tEnergia: 0,
+            estamina: 1, avisoEst: false,
             objetos: criarObjetos(), lidos: new Set(),
             alvo: null, aim: 0, flick: 1, flickT: 0,
-            avisos: { 600: false, 300: false, 60: false }, batida: 0,
-            fantasma: null, tFantasma: 25, tt: 0
+            avisos: { 300: false, 120: false, 60: false }, batida: 0,
+            monstro: null, tMonstro: 20, monstroVisto: false, tt: 0
         };
         atualizarCamera(0, true);
         atualizarInventario();
@@ -387,10 +394,28 @@ if (localStorage.getItem("audioAtivo") === "false") {
         msg('Você soltou: ' + ITENS[id].nome + '.', 2);
     }
 
-    function ganharBateria() {
+    function alvoUsaItem(o) {
+        return o.tipo === 'porta' || o.tipo === 'tabuas' || o.tipo === 'quadroForca' ||
+               o.tipo === 'saida' || (o.tipo === 'container' && o.trancado);
+    }
+
+    function usaBateriaAgora() {
+        if (jogo.inv[jogo.sel] !== 'bateria') return false;
+        const o = jogo.alvo;
+        if (!o) return true;
+        return alvoUsaItem(o) && jogo.bateria < 0.95;
+    }
+
+    function usarBateria() {
+        if (jogo.bateria > 0.95) {
+            som('erro');
+            msg('A lanterna já está carregada. Guarde a bateria para depois.', 2.8);
+            return;
+        }
+        consumirSelecionado();
         jogo.bateria = Math.min(1, jogo.bateria + BATERIA_GANHO);
         som('bateria');
-        msg('Você encontrou uma bateria! A lanterna foi recarregada.', 3);
+        msg('Você trocou a bateria. A lanterna foi recarregada.', 3);
     }
 
     function rotulo(o) {
@@ -427,12 +452,12 @@ if (localStorage.getItem("audioAtivo") === "false") {
 
     function interagir() {
         const o = jogo.alvo;
+        if (usaBateriaAgora()) { usarBateria(); return; }
         if (!o) return;
         const sel = jogo.inv[jogo.sel];
         switch (o.tipo) {
             case 'pegavel':
-                if (o.item === 'bateria') { o.pego = true; ganharBateria(); }
-                else if (adicionarItem(o.item)) {
+                if (adicionarItem(o.item)) {
                     o.pego = true; som('pegar');
                     msg('Você pegou: ' + ITENS[o.item].nome + '. ' + ITENS[o.item].dica, 3.4);
                 } else { som('erro'); msg('Inventário cheio (3/3). Solte um item com a tecla Q.', 3); }
@@ -489,8 +514,7 @@ if (localStorage.getItem("audioAtivo") === "false") {
         o.aberto = true; som('porta');
         const ganhos = [];
         o.da.forEach(function (id, i) {
-            if (id === 'bateria') { jogo.bateria = Math.min(1, jogo.bateria + BATERIA_GANHO); ganhos.push('uma bateria (lanterna recarregada)'); }
-            else if (adicionarItem(id)) ganhos.push(ITENS[id].nome);
+            if (adicionarItem(id)) ganhos.push(ITENS[id].nome);
             else { soltarNoChao(id, o.x + 22 + i * 18, o.y); ganhos.push(ITENS[id].nome + ' (caiu no chão: inventário cheio)'); }
         });
         msg(prefixo + 'Você encontrou: ' + ganhos.join(' e ') + '.', 4);
@@ -666,38 +690,82 @@ if (localStorage.getItem("audioAtivo") === "false") {
         else { const k = Math.min(1, dt * 5); cam.x += (ax - cam.x) * k; cam.y += (ay - cam.y) * k; }
     }
 
-    function atualizarFantasma(dt) {
-        const p = jogo.p, f = jogo.fantasma;
+    function atualizarMonstro(dt) {
+        const p = jogo.p, f = jogo.monstro;
         const luzOn = jogo.lanterna && jogo.bateria > 0;
+
         if (!f) {
-            jogo.tFantasma -= dt;
-            if (jogo.tFantasma <= 0 && p.noChao && !p.escada) {
-                let chao = null;
-                for (let i = 0; i < NIVEIS.length; i++) if (Math.abs(p.y - NIVEIS[i]) < 2) chao = NIVEIS[i];
-                if (chao !== null) {
-                    const lado = Math.random() < 0.5 ? -1 : 1;
-                    let x = p.x + lado * (320 + Math.random() * 160);
-                    if (x < 80 || x > MUNDO_W - 80) x = p.x - lado * (320 + Math.random() * 160);
-                    x = clamp(x, 60, MUNDO_W - 60);
-                    jogo.fantasma = { x: x, y: chao, vida: 4, lit: 0 };
-                    som('sussurro');
-                }
-                jogo.tFantasma = 25 + Math.random() * 35;
+            jogo.tMonstro -= dt;
+            if (jogo.tMonstro > 0) return;
+            if (!(p.noChao && !p.escada)) { jogo.tMonstro = 1; return; }
+            let chao = null;
+            for (let i = 0; i < NIVEIS.length; i++) if (Math.abs(p.y - NIVEIS[i]) < 2) chao = NIVEIS[i];
+            if (chao === null) { jogo.tMonstro = 1; return; }
+            const lado = Math.random() < 0.5 ? -1 : 1;
+            let x = p.x + lado * (360 + Math.random() * 200);
+            if (x < 80 || x > MUNDO_W - 80) x = p.x - lado * (360 + Math.random() * 200);
+            x = clamp(x, 60, MUNDO_W - 60);
+            jogo.monstro = { x: x, y: chao, lit: 0, idade: 0, sumindo: 0, fora: 0, somT: 0 };
+            som('sussurro'); som('rangido');
+            if (!jogo.monstroVisto) {
+                jogo.monstroVisto = true;
+                msg('Algo se move no escuro... Aponte a luz da lanterna para ele!', 4.5);
+            } else {
+                msg('Ele voltou! Mire a lanterna nele!', 3);
             }
-        } else {
-            f.vida -= dt;
-            f.x += Math.sign(p.x - f.x) * 35 * dt;
-            const ox = p.x + p.dir * 18, oy = p.y - 38;
-            const dx = f.x - ox, dy = (f.y - 55) - oy;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            let dif = Math.atan2(dy, dx) - jogo.aim;
-            while (dif > Math.PI) dif -= Math.PI * 2;
-            while (dif < -Math.PI) dif += Math.PI * 2;
-            if (luzOn && dist < 400 && Math.abs(dif) < 0.45) f.lit += dt;
-            if (f.lit > 0.5 && f.vida > 0.4) { f.vida = 0.4; som('sussurro'); }
-            if (Math.abs(p.x - f.x) < 30 && f.vida > 0.4) f.vida = 0.4;
-            if (f.vida <= 0) jogo.fantasma = null;
+            return;
         }
+
+        f.idade += dt;
+
+        if (f.sumindo > 0) {
+            f.sumindo -= dt;
+            if (f.sumindo <= 0) { jogo.monstro = null; jogo.tMonstro = 18 + Math.random() * 27; }
+            return;
+        }
+
+        const mesmoAndar = Math.abs(p.y - f.y) < 150;
+        if (mesmoAndar) f.fora = 0;
+        else {
+            f.fora += dt;
+            if (f.fora > 4) { f.sumindo = 0.6; return; }
+        }
+
+        const ox = p.x + p.dir * 18, oy = p.y - 38;
+        const dx = f.x - ox, dy = (f.y - 60) - oy;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        let dif = Math.atan2(dy, dx) - jogo.aim;
+        while (dif > Math.PI) dif -= Math.PI * 2;
+        while (dif < -Math.PI) dif += Math.PI * 2;
+        const iluminado = luzOn && mesmoAndar && dist < 420 && Math.abs(dif) < 0.5;
+        if (iluminado) f.lit += dt; else f.lit = Math.max(0, f.lit - dt * 0.6);
+        if (f.lit >= MONSTRO_TEMPO_LUZ) { f.sumindo = 0.6; som('sussurro'); return; }
+
+        if (mesmoAndar) {
+            const prog = 1 - jogo.tempo / TEMPO_TOTAL;
+            const vel = (MONSTRO_VEL_BASE + 45 * prog) * (iluminado ? 0.2 : 1);
+            f.x += Math.sign(p.x - f.x) * vel * dt;
+        }
+
+        if (mesmoAndar && Math.abs(p.x - f.x) < 26 && p.y > f.y - 55) { morrer('monstro'); return; }
+
+        const prox = Math.abs(p.x - f.x);
+        f.somT -= dt;
+        if (mesmoAndar && prox < 450 && f.somT <= 0) { som('batida'); f.somT = 0.35 + (prox / 450) * 0.9; }
+    }
+
+    function atualizarEstamina(dt) {
+        const luzOn = jogo.lanterna && jogo.bateria > 0;
+        if (luzOn) jogo.estamina = Math.min(1, jogo.estamina + ESTAMINA_RECUPERA * dt);
+        else jogo.estamina = Math.max(0, jogo.estamina - ESTAMINA_DRENO * dt);
+
+        if (!luzOn && jogo.estamina < 0.4 && !jogo.avisoEst) {
+            jogo.avisoEst = true;
+            msg('Você está perdendo o ar no escuro... Acenda a lanterna!', 3.5);
+            som('sussurro');
+        }
+        if (jogo.estamina > 0.7) jogo.avisoEst = false;
+        if (jogo.estamina <= 0) morrer('escuro');
     }
 
     function atualizar(dt) {
@@ -708,7 +776,7 @@ if (localStorage.getItem("audioAtivo") === "false") {
 
         if (jogo.lanterna && jogo.bateria > 0) {
             jogo.bateria = Math.max(0, jogo.bateria - dt / BATERIA_DURACAO);
-            if (jogo.bateria === 0) { msg('A bateria da lanterna acabou! Procure baterias pelo hotel.', 4.5); som('erro'); }
+            if (jogo.bateria === 0) { msg('A bateria acabou! Sem luz sua estamina cai. Use uma bateria (E) ou procure outra.', 4.5); som('erro'); }
         }
         jogo.flickT -= dt;
         if (jogo.flickT <= 0) {
@@ -719,10 +787,13 @@ if (localStorage.getItem("audioAtivo") === "false") {
         if (jogo.tEnergia > 0) jogo.tEnergia -= dt;
 
         atualizarAlvo();
-        atualizarFantasma(dt);
+        atualizarEstamina(dt);
+        if (modo !== 'jogando') return;
+        atualizarMonstro(dt);
+        if (modo !== 'jogando') return;
 
-        if (!jogo.avisos[600] && jogo.tempo <= 600) { jogo.avisos[600] = true; msg('Restam 10 minutos...', 3); som('rangido'); }
         if (!jogo.avisos[300] && jogo.tempo <= 300) { jogo.avisos[300] = true; msg('Restam 5 minutos. Algo se aproxima.', 3.5); som('sussurro'); }
+        if (!jogo.avisos[120] && jogo.tempo <= 120) { jogo.avisos[120] = true; msg('Restam 2 minutos! O hotel está contando o tempo...', 3.5); som('rangido'); }
         if (!jogo.avisos[60] && jogo.tempo <= 60) { jogo.avisos[60] = true; msg('Falta 1 minuto! Ele está chegando!', 3.5); }
         if (jogo.tempo <= 60) {
             jogo.batida -= dt;
@@ -733,7 +804,7 @@ if (localStorage.getItem("audioAtivo") === "false") {
     function atualizarHUD() {
         const t = fmt(jogo.tempo);
         if (el.tempo.textContent !== t) el.tempo.textContent = t;
-        el.tempo.classList.toggle('urgente', jogo.tempo <= 300);
+        el.tempo.classList.toggle('urgente', jogo.tempo <= 120);
 
         const pct = Math.round(jogo.bateria * 100);
         el.batNivel.style.width = pct + '%';
@@ -741,15 +812,27 @@ if (localStorage.getItem("audioAtivo") === "false") {
         el.batNivel.className = pct <= 15 ? 'critica' : (pct <= 40 ? 'baixa' : '');
         el.bateria.classList.toggle('desligada', !jogo.lanterna);
 
+        const luzOn = jogo.lanterna && jogo.bateria > 0;
+        const ep = Math.round(jogo.estamina * 100);
+        el.estNivel.style.width = ep + '%';
+        el.estPct.textContent = ep + '%';
+        el.estNivel.className = ep <= 20 ? 'critica' : (ep <= 45 ? 'baixa' : '');
+        el.estamina.classList.toggle('drenando', !luzOn);
+
         el.papeis.textContent = 'Papéis ' + jogo.lidos.size + '/' + TOTAL_PAPEIS;
 
-        const rot = (jogo.alvo && modo === 'jogando') ? rotulo(jogo.alvo) : null;
+        let rot = (jogo.alvo && modo === 'jogando') ? rotulo(jogo.alvo) : null;
+        if (modo === 'jogando' && usaBateriaAgora()) rot = 'Usar bateria';
         el.dica.textContent = rot ? '[E] ' + rot : '';
         el.dica.classList.toggle('visivel', !!rot);
 
-        const press = jogo.tempo < 300 ? (1 - jogo.tempo / 300) : 0;
-        const pulso = 0.5 + 0.5 * Math.sin(jogo.tt * (2 + press * 4));
-        el.vinheta.style.opacity = (press * 0.55 * (0.6 + 0.4 * pulso)).toFixed(3);
+        const press = jogo.tempo < 120 ? (1 - jogo.tempo / 120) : 0;
+        const pressEst = jogo.estamina < 0.5 ? (0.5 - jogo.estamina) * 2 : 0;
+        const m = jogo.monstro;
+        const pressMon = (m && Math.abs(jogo.p.y - m.y) < 150) ? clamp(1 - Math.abs(jogo.p.x - m.x) / 450, 0, 1) : 0;
+        const forca = Math.max(press * 0.55, pressEst * 0.8, pressMon * 0.6);
+        const pulso = 0.5 + 0.5 * Math.sin(jogo.tt * (2 + Math.max(press, pressEst, pressMon) * 6));
+        el.vinheta.style.opacity = (forca * (0.6 + 0.4 * pulso)).toFixed(3);
     }
 
     function paredes(c, s, topo, chao) {
@@ -1175,21 +1258,63 @@ if (localStorage.getItem("audioAtivo") === "false") {
         c.restore();
     }
 
-    function desenharFantasma(c) {
-        const f = jogo.fantasma;
+    function alfaMonstro(f) {
+        let a = Math.min(1, f.idade / 0.8);
+        if (f.sumindo > 0) a *= f.sumindo / 0.6;
+        return a;
+    }
+
+    function desenharMonstro(c) {
+        const f = jogo.monstro;
         if (!f) return;
-        const a = clamp(f.vida / 0.4, 0, 1) * (0.55 + 0.2 * Math.sin(jogo.tt * 20));
-        c.save(); c.globalAlpha = a; c.translate(f.x, f.y);
-        c.fillStyle = '#cfd3d6';
-        c.beginPath(); c.moveTo(-14, -100); c.quadraticCurveTo(-26, -40, -32, 0);
-        for (let i = 0; i < 6; i++) c.lineTo(-32 + (i + 1) * 10.6, (i % 2 === 0) ? -8 : 0);
-        c.quadraticCurveTo(26, -40, 14, -100); c.closePath(); c.fill();
-        c.beginPath(); c.arc(0, -112, 13, 0, Math.PI * 2); c.fill();
-        c.fillStyle = '#0a0a0a';
-        c.beginPath(); c.moveTo(-14, -118); c.quadraticCurveTo(-26, -80, -17, -46); c.lineTo(-9, -58); c.lineTo(-8, -110); c.fill();
-        c.beginPath(); c.moveTo(14, -118); c.quadraticCurveTo(26, -80, 17, -46); c.lineTo(9, -58); c.lineTo(8, -110); c.fill();
-        R(c, -6, -115, 4, 8, '#000'); R(c, 2, -115, 4, 8, '#000'); R(c, -3, -103, 6, 2, '#222');
+        const dir = jogo.p.x >= f.x ? 1 : -1;
+        const bal = Math.sin(jogo.tt * 3 + f.x * 0.01);
+        c.save();
+        c.globalAlpha = alfaMonstro(f);
+        c.translate(f.x, f.y);
+        c.scale(dir, 1);
+
+        c.fillStyle = '#1b1416';
+        c.beginPath(); c.moveTo(-18, 0); c.quadraticCurveTo(-36, -60, -22, -104);
+        c.quadraticCurveTo(-6, -128, 14, -110); c.quadraticCurveTo(32, -60, 20, 0); c.closePath(); c.fill();
+        c.strokeStyle = '#3a2a2e'; c.lineWidth = 1.5; c.stroke();
+
+        c.strokeStyle = '#1b1416'; c.lineWidth = 7; c.lineCap = 'round';
+        c.beginPath(); c.moveTo(10, -96); c.quadraticCurveTo(40, -70 + bal * 4, 48, -26 + bal * 6); c.stroke();
+        c.beginPath(); c.moveTo(-6, -96); c.quadraticCurveTo(26, -58, 36, -12 + bal * 5); c.stroke();
+        c.lineWidth = 2;
+        for (let i = 0; i < 3; i++) {
+            c.beginPath(); c.moveTo(48, -26 + bal * 6); c.lineTo(54 + i * 3, -14 + bal * 6 + i * 5); c.stroke();
+            c.beginPath(); c.moveTo(36, -12 + bal * 5); c.lineTo(42 + i * 3, 0 + i * 4); c.stroke();
+        }
+
+        c.fillStyle = '#241a1d';
+        c.beginPath(); c.ellipse(8, -120, 15, 19, 0.15, 0, Math.PI * 2); c.fill();
+
+        c.fillStyle = '#ff2020'; c.shadowColor = '#ff0000'; c.shadowBlur = 12;
+        c.beginPath(); c.arc(5, -124, 2.6, 0, Math.PI * 2); c.fill();
+        c.beginPath(); c.arc(14, -124, 2.6, 0, Math.PI * 2); c.fill();
+        c.shadowBlur = 0;
+        c.fillStyle = '#050000';
+        c.beginPath(); c.moveTo(0, -112); c.quadraticCurveTo(10, -98, 20, -112); c.quadraticCurveTo(10, -108, 0, -112); c.fill();
+        c.fillStyle = '#d8d2b8';
+        for (let i = 0; i < 5; i++) {
+            c.beginPath(); c.moveTo(2 + i * 4, -111); c.lineTo(4 + i * 4, -111); c.lineTo(3 + i * 4, -106); c.closePath(); c.fill();
+        }
         c.restore();
+    }
+
+    function desenharOlhosMonstro(cx, cy) {
+        const f = jogo.monstro;
+        if (!f) return;
+        const dir = jogo.p.x >= f.x ? 1 : -1;
+        const ey = f.y - 124 - cy;
+        ctx.save();
+        ctx.globalAlpha = alfaMonstro(f) * (0.7 + 0.3 * Math.sin(jogo.tt * 9));
+        ctx.fillStyle = '#ff2020'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 16;
+        ctx.beginPath(); ctx.arc(f.x + dir * 5 - cx, ey, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(f.x + dir * 14 - cx, ey, 2.6, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
     }
 
     function cortar(L, x, y, r, a) {
@@ -1254,7 +1379,7 @@ if (localStorage.getItem("audioAtivo") === "false") {
             cortar(L, j.x - cx, j.n - 200 - cy, 110, 0.3);
         }
         cortar(L, 2880 - cx, CHAO.L0 - 150 - cy, 120, 0.5 * (0.6 + 0.4 * Math.sin(jogo.tt * 5)));
-        if (jogo.fantasma) cortar(L, jogo.fantasma.x - cx, jogo.fantasma.y - 60 - cy, 55, 0.18);
+        if (jogo.monstro) cortar(L, jogo.monstro.x - cx, jogo.monstro.y - 60 - cy, 60, 0.12);
         cortar(L, p.x - cx, p.y - 35 - cy, 85, 0.55);
 
         if (luzOn) {
@@ -1275,10 +1400,11 @@ if (localStorage.getItem("audioAtivo") === "false") {
         ctx.save();
         ctx.translate(-cx, -cy);
         for (let i = 0; i < jogo.objetos.length; i++) desenharObjeto(ctx, jogo.objetos[i]);
-        desenharFantasma(ctx);
+        desenharMonstro(ctx);
         desenharJogador(ctx, jogo.p);
         ctx.restore();
         desenharLuz(cx, cy);
+        desenharOlhosMonstro(cx, cy);
     }
 
     function iniciarSusto() {
@@ -1349,10 +1475,25 @@ if (localStorage.getItem("audioAtivo") === "false") {
         if (t < 0.15) { c.fillStyle = 'rgba(255,255,255,' + (0.8 - t * 5) + ')'; c.fillRect(0, 0, W, H); }
     }
 
-    function gameOver() {
+    function gameOver(texto) {
         modo = 'gameover';
         el.telaSusto.classList.remove('ativa');
+        el.gameoverTexto.textContent = texto ||
+            'O tempo acabou. Ele te encontrou antes que você conseguisse sair do hotel...';
         el.telaGameover.classList.add('ativa');
+    }
+
+    function morrer(causa) {
+        el.hud.classList.add('oculto');
+        el.vinheta.style.opacity = 0;
+        el.msg.classList.remove('visivel');
+        if (causa === 'monstro') {
+            som('susto');
+            gameOver('A criatura saiu da escuridão e te alcançou. Mire a luz da lanterna nela antes que chegue perto...');
+        } else {
+            som('batida');
+            gameOver('Sem luz, o medo tomou conta de você. Sua estamina acabou e você desabou na escuridão do hotel...');
+        }
     }
 
     function vitoria() {
