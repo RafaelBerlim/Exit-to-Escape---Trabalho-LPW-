@@ -32,6 +32,14 @@
     let skinAtual = localStorage.getItem('skinJogador');
     if (!SKINS[skinAtual]) skinAtual = SKIN_PADRAO;
 
+    const GERENTE_VEL = 165;
+    const GERENTE_INICIO_CACA = 5.6;
+    const GERENTE_FALAS = [
+        { t: 0, txt: 'GERENTE: Então você leu todos os papéis...' },
+        { t: 2.8, txt: 'GERENTE: Você sabe demais.' },
+        { t: 5.6, txt: 'GERENTE: Ninguém sai do Alvorada sabendo o que você sabe. CORRA.' }
+    ];
+
     const ITENS = {
         chaveLatao:   { nome: 'Chave de Latão',  dica: 'Tem o número 204 gravado.', cor: '#d4a72c' },
         chavePequena: { nome: 'Chave Pequena',   dica: 'Parece servir em um armário.', cor: '#9fb0b8' },
@@ -322,7 +330,8 @@ if (localStorage.getItem("audioAtivo") === "false") {
             objetos: criarObjetos(), lidos: new Set(),
             alvo: null, aim: 0, flick: 1, flickT: 0,
             avisos: { 300: false, 120: false, 60: false }, batida: 0,
-            monstro: null, tMonstro: 20, monstroVisto: false, tt: 0
+            monstro: null, tMonstro: 20, monstroVisto: false, tt: 0,
+            gerente: null, gerenteChamado: false
         };
         atualizarCamera(0, true);
         atualizarInventario();
@@ -544,7 +553,7 @@ if (localStorage.getItem("audioAtivo") === "false") {
     function fecharPapel() {
         el.modalPapel.classList.remove('ativa');
         modo = 'jogando';
-        if (jogo.lidos.size === TOTAL_PAPEIS) msg('Você leu todos os papéis. Agora entende o que aconteceu aqui...', 4);
+        if (jogo.lidos.size === TOTAL_PAPEIS) jogo.gerenteChamado = true;
     }
 
     function montarTeclado() {
@@ -766,6 +775,113 @@ if (localStorage.getItem("audioAtivo") === "false") {
         if (mesmoAndar && prox < 450 && f.somT <= 0) { som('batida'); f.somT = 0.35 + (prox / 450) * 0.9; }
     }
 
+    function andarDoJogador() {
+        const p = jogo.p;
+        for (let i = 0; i < NIVEIS.length; i++) if (NIVEIS[i] >= p.y - 0.5) return NIVEIS[i];
+        return NIVEIS[NIVEIS.length - 1];
+    }
+
+    function caminhoLivre(x1, x2, y) {
+        const a = Math.min(x1, x2), b = Math.max(x1, x2), S = solidos();
+        for (let i = 0; i < S.length; i++) {
+            const s = S[i];
+            if (y > s.y1 && y - 64 < s.y2 && s.x2 > a && s.x1 < b) return false;
+        }
+        return true;
+    }
+
+    function andarGerente(g, alvoX, vel, dt) {
+        const d = alvoX - g.x;
+        if (Math.abs(d) < 3) { g.andando = false; return; }
+        g.dir = d > 0 ? 1 : -1;
+        let nx = clamp(g.x + g.dir * vel * dt, 24, MUNDO_W - 24);
+        const S = solidos();
+        for (let i = 0; i < S.length; i++) {
+            const s = S[i];
+            if (g.y > s.y1 && g.y - 64 < s.y2 && nx + 13 > s.x1 && nx - 13 < s.x2) {
+                nx = (g.x < (s.x1 + s.x2) / 2) ? s.x1 - 13 : s.x2 + 13;
+            }
+        }
+        g.x = nx; g.andando = true; g.animT += dt;
+    }
+
+    function atualizarGerente(dt) {
+        const p = jogo.p;
+        let g = jogo.gerente;
+
+        if (!g) {
+            if (!jogo.gerenteChamado) return;
+            if (!(p.noChao && !p.escada)) return;
+            const andar = andarDoJogador();
+            const primeiro = Math.random() < 0.5 ? -1 : 1;
+            let x = null;
+            [primeiro, -primeiro].forEach(function (lado) {
+                if (x !== null) return;
+                for (let d = 520; d >= 220; d -= 60) {
+                    const cand = p.x + lado * d;
+                    if (cand > 60 && cand < MUNDO_W - 60 && caminhoLivre(p.x, cand, andar)) { x = cand; return; }
+                }
+            });
+            if (x === null) return;
+            g = jogo.gerente = { x: x, y: andar, escada: null, t: 0, fala: -1, dir: p.x >= x ? 1 : -1,
+                                 andando: false, animT: 0, passoT: 0, somT: 0 };
+            jogo.monstro = null; jogo.tMonstro = 1e9;
+            som('rangido'); som('sussurro');
+        }
+
+        g.t += dt;
+        while (g.fala + 1 < GERENTE_FALAS.length && g.t >= GERENTE_FALAS[g.fala + 1].t) {
+            g.fala++;
+            msg(GERENTE_FALAS[g.fala].txt, 2.8);
+            som(g.fala === GERENTE_FALAS.length - 1 ? 'rangido' : 'sussurro');
+        }
+        if (g.t < GERENTE_INICIO_CACA) {
+            g.dir = p.x >= g.x ? 1 : -1;
+            g.andando = false;
+            return;
+        }
+
+        const alvoY = andarDoJogador();
+        const prog = 1 - jogo.tempo / TEMPO_TOTAL;
+        const vel = GERENTE_VEL + 20 * prog;
+        g.andando = false;
+
+        if (g.escada) {
+            const l = g.escada;
+            g.x += (l.x - g.x) * Math.min(1, dt * 15);
+            const dirY = Math.sign(alvoY - g.y);
+            g.andando = true; g.animT += dt;
+            if (dirY === 0) { g.escada = null; }
+            else {
+                g.y += dirY * VEL_ESCADA * dt;
+                if (g.y <= l.topo) { g.y = l.topo; g.escada = null; }
+                else if (g.y >= l.base) { g.y = l.base; g.escada = null; }
+            }
+        } else if (Math.abs(g.y - alvoY) < 1) {
+            g.y = alvoY;
+            andarGerente(g, p.x, vel, dt);
+        } else {
+            const descer = alvoY > g.y;
+            let l = null;
+            for (let i = 0; i < LADDERS.length; i++) {
+                if (descer ? LADDERS[i].topo === g.y : LADDERS[i].base === g.y) l = LADDERS[i];
+            }
+            if (l) {
+                if (Math.abs(g.x - l.x) < 4) { g.escada = l; g.x = l.x; }
+                else andarGerente(g, l.x, vel, dt);
+            }
+        }
+
+        // faca: ele não pula, então plataformas e pulos por cima dele salvam
+        const dx = Math.abs(p.x - g.x), dy = g.y - p.y;
+        if (dx < 24 && dy < 32 && dy > -40) { morrer('faca'); return; }
+
+        const mesmoAndar = Math.abs(p.y - g.y) < 150;
+        g.passoT -= dt; g.somT -= dt;
+        if (g.andando && mesmoAndar && dx < 600 && g.passoT <= 0) { som('passo'); g.passoT = 0.3; }
+        if (mesmoAndar && dx < 450 && g.somT <= 0) { som('batida'); g.somT = 0.35 + (dx / 450) * 0.9; }
+    }
+
     function atualizarEstamina(dt) {
         const luzOn = jogo.lanterna && jogo.bateria > 0;
         if (luzOn) jogo.estamina = Math.min(1, jogo.estamina + ESTAMINA_RECUPERA * dt);
@@ -802,6 +918,8 @@ if (localStorage.getItem("audioAtivo") === "false") {
         atualizarEstamina(dt);
         if (modo !== 'jogando') return;
         atualizarMonstro(dt);
+        if (modo !== 'jogando') return;
+        atualizarGerente(dt);
         if (modo !== 'jogando') return;
 
         if (!jogo.avisos[300] && jogo.tempo <= 300) { jogo.avisos[300] = true; msg('Restam 5 minutos. Algo se aproxima.', 3.5); som('sussurro'); }
@@ -1346,6 +1464,61 @@ if (localStorage.getItem("audioAtivo") === "false") {
         c.restore();
     }
 
+    function desenharGerente(c) {
+        const g = jogo.gerente;
+        if (!g) return;
+        c.save();
+        c.globalAlpha = Math.min(1, g.t / 0.8);
+        c.translate(Math.round(g.x), Math.round(g.y));
+        c.fillStyle = 'rgba(0,0,0,0.4)'; c.beginPath(); c.ellipse(0, 0, 15, 3, 0, 0, Math.PI * 2); c.fill();
+        const sw = g.andando ? Math.sin(g.animT * 10) : 0;
+
+        if (g.escada) {
+            R(c, -8, -28 + (sw > 0 ? 3 : 0), 7, 28 - (sw > 0 ? 3 : 0), '#0a0a0e');
+            R(c, 1, -28 + (sw > 0 ? 0 : 3), 7, 28 - (sw > 0 ? 0 : 3), '#101016');
+            R(c, -11, -54, 22, 28, '#0c0c12');
+            R(c, -8, -72, 16, 18, '#0a0a0a');
+            R(c, -14, -70 + (sw > 0 ? 0 : 7), 4, 20, '#0c0c12');
+            R(c, 10, -70 + (sw > 0 ? 7 : 0), 4, 20, '#0c0c12');
+            c.restore();
+            return;
+        }
+
+        c.scale(g.dir, 1);
+        R(c, -8 + sw * 6, -28, 7, 28, '#0a0a0e'); R(c, -9 + sw * 6, -4, 10, 4, '#000');
+        R(c, 1 - sw * 6, -28, 7, 28, '#101016'); R(c, 0 - sw * 6, -4, 10, 4, '#000');
+        R(c, -13, -52, 5, 22, '#090910');
+        R(c, -11, -54, 22, 28, '#0c0c12');
+        R(c, -1, -54, 6, 24, '#d8d0c0');
+        R(c, 1, -52, 3, 16, '#8a0a0a');
+        R(c, -6, -40, 4, 5, '#5a0808'); R(c, -2, -33, 3, 3, '#5a0808');
+        R(c, -8, -72, 16, 18, '#cfc6b4');
+        R(c, -9, -75, 18, 6, '#0a0a0a'); R(c, -9, -72, 4, 10, '#0a0a0a');
+        R(c, 2, -66, 3, 3, '#1a0000');
+        R(c, 1, -58, 6, 1.5, '#3a0a0a');
+        c.save(); c.translate(8, -50); c.rotate(-0.2 + sw * 0.18);
+        R(c, 0, -2, 13, 5, '#0c0c12');
+        R(c, 12, -2, 4, 5, '#cfc6b4');
+        R(c, 15, -3, 4, 7, '#2a1408');
+        c.fillStyle = '#d6dce0';
+        c.beginPath(); c.moveTo(19, -3); c.lineTo(37, 0); c.lineTo(19, 3); c.closePath(); c.fill();
+        R(c, 33, -1, 4, 2, '#a01010');
+        c.restore();
+        c.restore();
+    }
+
+    function desenharOlhosGerente(cx, cy) {
+        const g = jogo.gerente;
+        if (!g) return;
+        const dir = g.escada ? 0 : g.dir;
+        if (!dir) return;
+        ctx.save();
+        ctx.globalAlpha = Math.min(1, g.t / 0.8) * (0.75 + 0.25 * Math.sin(jogo.tt * 8));
+        ctx.fillStyle = '#ff2020'; ctx.shadowColor = '#ff0000'; ctx.shadowBlur = 14;
+        ctx.beginPath(); ctx.arc(g.x + dir * 3.5 - cx, g.y - 64.5 - cy, 2.2, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+    }
+
     function desenharOlhosMonstro(cx, cy) {
         const f = jogo.monstro;
         if (!f) return;
@@ -1443,10 +1616,12 @@ if (localStorage.getItem("audioAtivo") === "false") {
         ctx.translate(-cx, -cy);
         for (let i = 0; i < jogo.objetos.length; i++) desenharObjeto(ctx, jogo.objetos[i]);
         desenharMonstro(ctx);
+        desenharGerente(ctx);
         desenharJogador(ctx, jogo.p);
         ctx.restore();
         desenharLuz(cx, cy);
         desenharOlhosMonstro(cx, cy);
+        desenharOlhosGerente(cx, cy);
     }
 
     function iniciarSusto() {
@@ -1529,7 +1704,10 @@ if (localStorage.getItem("audioAtivo") === "false") {
         el.hud.classList.add('oculto');
         el.vinheta.style.opacity = 0;
         el.msg.classList.remove('visivel');
-        if (causa === 'monstro') {
+        if (causa === 'faca') {
+            som('susto');
+            gameOver('O Gerente te alcançou com a faca. Quem sabe demais não sai do Alvorada... Dica: ele não consegue pular!');
+        } else if (causa === 'monstro') {
             som('susto');
             gameOver('A criatura saiu da escuridão e te alcançou. Mire a luz da lanterna nela antes que chegue perto...');
         } else {
@@ -1701,4 +1879,4 @@ if (localStorage.getItem("audioAtivo") === "false") {
             .then(construirFundo).catch(function () {});
     }
     requestAnimationFrame(loop);
-})();   
+})();
