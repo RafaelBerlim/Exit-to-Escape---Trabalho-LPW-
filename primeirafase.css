@@ -523,3 +523,76 @@ body {
     60% { transform: translateX(-6px); }
     80% { transform: translateX(6px); }
 }
+
+.skin-grupos {
+    display: flex;
+    gap: 6cqw;
+    align-items: flex-start;
+    justify-content: center;
+}
+
+.skin-grupo h2 {
+    margin-bottom: 1.2cqw;
+    color: #d61111;
+}
+
+.skin-lista {
+    display: flex;
+    gap: 2cqw;
+}
+
+.skin-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.8cqw;
+    padding: 1.2cqw 1.6cqw;
+    background: rgba(20, 3, 3, 0.8);
+    border: 0.25cqw solid #4a1111;
+    border-radius: 0.8cqw;
+    cursor: pointer;
+    font-size: 1cqw;
+    color: #a58a8a;
+    transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+
+.skin-card canvas {
+    width: 9cqw;
+    height: 13.1cqw;
+    image-rendering: pixelated;
+}
+
+.skin-card:hover {
+    transform: scale(1.05);
+    border-color: #8a1a1a;
+}
+
+.skin-card.ativo {
+    border-color: #d61111;
+    color: #fff;
+    box-shadow: 0 0 1.6cqw rgba(214, 17, 17, 0.8);
+}
+
+.skin-dica {
+    margin: 0;
+    font-size: 0.9cqw;
+    color: #a58a8a;
+}
+
+.skin-dica b {
+    color: #e6d8d8;
+    font-weight: 400;
+}
+
+.btn-voltar-skin {
+    border: none;
+    background: none;
+    font-family: "Press Start 2P", monospace;
+    font-size: 0.95cqw;
+    color: #8a6a6a;
+    cursor: pointer;
+}
+
+.btn-voltar-skin:hover {
+    color: #d61111;
+}
