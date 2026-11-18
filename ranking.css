@@ -1,0 +1,76 @@
+
+.ranking-main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 65vh;
+    padding: 30px 15px;
+}
+
+.ranking-container {
+    width: min(900px, 100%);
+    padding: 30px;
+    background: rgba(15, 5, 7, 0.9);
+    border: 1px solid #72151c;
+    border-radius: 10px;
+    box-shadow: 0 0 25px rgba(165, 9, 18, 0.25);
+    overflow-x: auto;
+}
+
+.ranking-container h2 {
+    color: #c51a22;
+    text-align: center;
+    font-family: "Creepster", cursive;
+    font-size: 32px;
+    font-weight: normal;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #e8d8d0;
+    font-family: "Montserrat", sans-serif;
+}
+
+th, td {
+    padding: 15px 10px;
+    text-align: center;
+    border-bottom: 1px solid #542027;
+}
+
+th {
+    color: #e34b52;
+    font-family: "Press Start 2P", monospace;
+    font-size: 10px;
+}
+
+#sem-resultados {
+    text-align: center;
+    color: #bba9a2;
+    font-family: "Montserrat", sans-serif;
+}
+
+.voltar {
+    width: 230px;
+    min-height: 55px;
+    margin: 30px auto 0;
+    text-decoration: none;
+    border: 1px solid #72151c;
+    background: #26090d;
+}
+
+@media (max-width: 600px) {
+    .ranking-container {
+        padding: 15px 8px;
+    }
+
+    th, td {
+        padding: 10px 5px;
+        font-size: 11px;
+    }
+
+    th {
+        font-size: 8px;
+    }
+}

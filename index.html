@@ -24,6 +24,7 @@
     <link rel="stylesheet" href="index.css">
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="menu.js" defer></script>
+    <script src="modal.js" defer></script>
 </head>
 
 <body class="home-page">
@@ -34,6 +35,10 @@
             <p id="start" class="menu-item"><a href="primeirafase.html" class="btn">Start</a></p>
             <p id="options" class="menu-item"><a href="opcoes.html" class="btn">Options</a></p>
             <p id="participants" class="menu-item"><a href="participantes.html" class="btn">Participants</a></p>
+            <p id="about" class="menu-item">
+    <button type="button" id="abrir-sobre" class="btn btn-modal">About</button>
+</p>
+            <p id="ranking" class="menu-item"><a href="ranking.html" class="btn">Ranking</a></p>
         </div>
 
         <div class="porta" aria-hidden="true">
@@ -94,9 +99,31 @@
                 <polygon points="210,191.3 340,138.8 340,449.5 210,367.4" fill="none" stroke="#1b0906" stroke-width="6" stroke-linejoin="round"/>
             </svg>
         </div>
+        <dialog id="modal-sobre" class="modal-sobre">
+    <div class="conteudo-modal">
+        <h2>ÚLTIMO PEDIDO</h2>
+
+        <p>
+            ÚLTIMO PEDIDO (Exit to Escape) é um jogo digital de terror e suspense.
+            O jogador precisa escapar de um restaurante misterioso
+            durante a madrugada, explorando o ambiente, encontrando
+            objetos, resolvendo enigmas e evitando perseguidores.
+        </p>
+
+        <h3>Desenvolvido por</h3>
+
+        <ul>
+            <li>Rafael Berlim Silva Melo</li>
+            <li>Victor Oliveira</li>
+            <li>Victor Hugo</li>
+        </ul>
+
+        <button type="button" id="fechar-sobre">Fechar</button>
+    </div>
+</dialog>
     </main>
 
-    <footer class="site-footer"><p>&copy; 2026 Todos os direitos reservados.</p></footer>
+    <footer class="site-footer"><p>© 2026 Todos os direitos reservados.</p></footer>
 
 </body>
 </html>

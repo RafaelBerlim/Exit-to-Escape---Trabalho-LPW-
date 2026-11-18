@@ -1716,9 +1716,40 @@ if (localStorage.getItem("audioAtivo") === "false") {
         }
     }
 
+
+function salvarPontuacao() {
+    const usuario = sessionStorage.getItem('usuarioAtual') || 'Anônimo';
+    const pontuacao = Math.floor(jogo.tempo) * 10 + jogo.lidos.size * 100;
+
+    let ranking = [];
+
+    try {
+        ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+    } catch (e) {
+        ranking = [];
+    }
+
+    ranking.push({
+        usuario: usuario,
+        personagem: skinAtual,
+        pontuacao: pontuacao,
+        tempo: Math.floor(jogo.tempo),
+        papeis: jogo.lidos.size
+    });
+
+    ranking.sort(function (a, b) {
+        return b.pontuacao - a.pontuacao;
+    });
+
+    ranking = ranking.slice(0, 10);
+
+    localStorage.setItem('ranking', JSON.stringify(ranking));
+}
+
     function vitoria() {
         modo = 'vitoria';
         som('vitoria');
+        salvarPontuacao();
         el.hud.classList.add('oculto');
         el.vinheta.style.opacity = 0;
         el.msg.classList.remove('visivel');

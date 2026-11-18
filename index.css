@@ -352,3 +352,78 @@ body.screen-flicker::after {
         transition-duration: 0.01ms !important;
     }
 }
+
+.btn-modal {
+    padding: 0;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.modal-sobre {
+    width: min(550px, 90%);
+    padding: 0;
+    border: 1px solid #a50912;
+    border-radius: 8px;
+    background: #100708;
+    color: #d6c8bd;
+    box-shadow: 0 0 35px rgba(165, 9, 18, 0.5);
+}
+
+.modal-sobre::backdrop {
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(4px);
+}
+
+.conteudo-modal {
+    padding: 30px;
+    font-family: "Montserrat", sans-serif;
+    line-height: 1.7;
+}
+
+.conteudo-modal h2 {
+    color: #c51a22;
+    font-family: "Creepster", cursive;
+    font-size: 36px;
+    font-weight: normal;
+    text-align: center;
+    letter-spacing: 2px;
+}
+
+.conteudo-modal h3 {
+    color: #e34b52;
+    font-family: "Press Start 2P", monospace;
+    font-size: 12px;
+    margin-top: 25px;
+}
+
+.conteudo-modal li {
+    margin: 8px 0;
+}
+
+.conteudo-modal button {
+    display: block;
+    margin: 25px auto 0;
+    padding: 12px 25px;
+    border: 1px solid #a50912;
+    background: #3b0509;
+    color: #d6c8bd;
+    font-family: "Press Start 2P", monospace;
+    font-size: 11px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.conteudo-modal button:hover {
+    background: #a50912;
+}
+
+@media (max-width: 480px) {
+    .conteudo-modal {
+        padding: 20px;
+    }
+
+    .conteudo-modal h2 {
+        font-size: 28px;
+    }
+}
