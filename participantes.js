@@ -1,12 +1,12 @@
 let participantes = {
     rafael: {
         nome: "Rafael Berlim Silva Melo",
-        descricao: "Responsável pela maior parte do desenvolvimento da primeira fase do jogo, incluindo a criação dos objetos, elementos gráficos, efeitos sonoros e mecânicas de jogabilidade. Também desenvolveu o sistema de autenticação, com as funcionalidades de criação de contas e login dos jogadores."
+        descricao: "Responsável pela maior parte do desenvolvimento da primeira fase do jogo, incluindo a criação dos objetos, elementos gráficos, efeitos sonoros, características do jogador e mecânicas de jogabilidade. Também desenvolveu o sistema de autenticação, com as funcionalidades de criação de contas e login dos jogadores, além de ter feito a seleção de personagens."
     },
 
     victor: {
         nome: "Victor Oliveira",
-        descricao: "Responsável pelo desenvolvimento da página de opções e pela implementação da lógica de configuração dos recursos sonoros do jogo. Também desenvolveu a página de ranking, a página informativa (About) e a página de créditos dos participantes."
+        descricao: "Responsável pelo desenvolvimento da página de opções e pela implementação da lógica de configuração dos recursos sonoros do jogo. Também desenvolveu a página de ranking, a página informativa (About), a jogabilidade mobile e a página de créditos dos participantes."
     },
 
     vitugo: {

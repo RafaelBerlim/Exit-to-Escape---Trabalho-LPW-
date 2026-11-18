@@ -427,3 +427,23 @@ body.screen-flicker::after {
         font-size: 28px;
     }
 }
+@media screen and (max-width: 768px) {
+  body {
+    padding: 10px;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  div, form, .container, .caixa-login, .menu-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 15px !important;
+    box-sizing: border-box;
+  }
+
+  button, .btn, a.button {
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+    min-height: 44px;
+  }
+}
