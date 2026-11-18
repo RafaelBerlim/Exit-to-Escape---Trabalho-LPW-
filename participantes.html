@@ -22,10 +22,24 @@
  
     <main>
         <div class="lista-participantes">
-            <div class="nome-participante">Rafael Berlim Silva Melo</div>
-            <div class="nome-participante">Victor Oliveira</div>
-            <div class="nome-participante">Victor Hugo</div>
-        </div>
+    <button class="nome-participante" data-participante="rafael">
+        Rafael Berlim Silva Melo
+    </button>
+
+    <button class="nome-participante" data-participante="victor">
+        Victor Oliveira
+    </button>
+
+    <button class="nome-participante" data-participante="vitugo">
+        Victor Hugo
+    </button>
+</div>
+
+<dialog id="modal-participante">
+    <h2 id="nome-modal"></h2>
+    <p id="descricao-modal"></p>
+    <button id="fechar-modal">Fechar</button>
+</dialog>
  
         <section class="sobre-projeto">
             <h2>Sobre o projeto</h2>
@@ -40,5 +54,6 @@
         <p style="font-size: 10px; margin: 0;">&copy; 2026 Todos os direitos reservados.</p>
     </footer>
  
+    <script src="participantes.js" defer></script>
 </body>
 </html>
